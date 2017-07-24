@@ -26,7 +26,7 @@ class ViewController: UIViewController {
             return Double(display.text!)!
         }
         set {
-            display.text = String(newValue)
+            display.text = brain.formatter.string(from: NSNumber(value:newValue)) ?? "0"
         }
     }
     
@@ -62,12 +62,31 @@ class ViewController: UIViewController {
         }
         if let mathematicalSymbol = sender.currentTitle {
             brain.performOperation(mathematicalSymbol)
-            historyLabel.text = brain.resultIsPending ? brain.description + " ..." : brain.description + " ="
         }
         if let result = brain.result {
             displayValue = result
         }
+        historyLabel.text = (brain.description ?? " ") + (brain.resultIsPending ? " ..." : " =")
     }
     
+    // A user touched the "C" button
+    @IBAction func touchReset(_ sender: UIButton) {
+        displayValue = 0
+        historyLabel.text = " "
+        brain.reset()
+        userIsInTheMiddleOfTyping = false
+        userTypedDecimalPoint = false
+    }
+    
+    // A user touched the "Backspace" button
+    @IBAction func touchBackspace(_ sender: UIButton) {
+        guard userIsInTheMiddleOfTyping && !display.text!.isEmpty else {
+            return
+        }
+        display.text = String(display.text!.characters.dropLast())
+        if display.text!.isEmpty {
+            displayValue = 0
+        }
+    }
 }
 
